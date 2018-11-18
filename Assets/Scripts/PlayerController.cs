@@ -2,10 +2,11 @@
 
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerController : PhysicsObject {
-    
-    public float maxSpeed = 7f;
-    public float jumpVelocity = 7f;
-    public float jumpCancelVelocityModifier = 0.5f;
+
+    public bool canCancelJump = true;
+    public float speed = 8f;
+    public float jumpVelocity = 14f;
+    public float jumpCancelVelocityModifier = 0.3f;
     private bool wasWallLatched;
 
     private SpriteRenderer spriteRenderer;
@@ -13,41 +14,37 @@ public class PlayerController : PhysicsObject {
     private AudioSource audioSource;
     public AudioClip jumpSound;
     public AudioClip latchSound;
-    public AudioClip hurtSound;
 
     // Use this for initialization
     void Awake () {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
-	}
+    }
 
     protected override void ComputeVelocity()
     {
         // Play latch sound if just latched
         if (!wasWallLatched && wallLatched)
         {
-            audioSource.clip = latchSound;
-            audioSource.Play();
+            audioSource.PlayOneShot(latchSound);
         }
         wasWallLatched = wallLatched;
 
         Vector2 move = Vector2.zero;
 
-        move.x = Input.GetAxisRaw("Horizontal") * maxSpeed;
+        move.x = Input.GetAxisRaw("Horizontal") * speed;
 
         if (Input.GetButtonDown("Jump") && (grounded || wallLatched))
         {
             wallLatchCooldownTimer = wallLatchCooldown;
             wallLatched = false;
-            //canMove = true;
             velocity.y = jumpVelocity;
 
             // Play jump sound
-            audioSource.clip = jumpSound;
-            audioSource.Play();
+            audioSource.PlayOneShot(jumpSound);
         }
-        else if (Input.GetButtonUp("Jump"))
+        else if (Input.GetButtonUp("Jump") && canCancelJump)
         {
             if (velocity.y > 0)
             {
@@ -63,7 +60,7 @@ public class PlayerController : PhysicsObject {
 
         animator.SetBool("grounded", grounded);
         animator.SetBool("wallLatched", wallLatched);
-        animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / maxSpeed);
+        animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / speed);
 
         targetVelocity = move;
     }

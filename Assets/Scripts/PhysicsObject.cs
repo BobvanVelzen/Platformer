@@ -5,8 +5,12 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicsObject : MonoBehaviour {
 
-    public float minGroundNormalY = .65f;
-    public float maxWallNormalY = -.65f;
+    protected const float minMoveDistance = .001f;
+    protected const float shellRadius = .01f;
+    public float wallLatchCooldown = 0.3f;
+    protected float wallLatchCooldownTimer = 0f;
+    protected float minGroundNormalY = .65f;
+    protected float maxWallNormalY = -.65f;
     public float gravityModifier = 1f;
     public bool canWallLatch = false;
 
@@ -20,10 +24,6 @@ public class PhysicsObject : MonoBehaviour {
     protected RaycastHit2D[] hitBuffer = new RaycastHit2D[16];
     protected List<RaycastHit2D> hitBufferList = new List<RaycastHit2D>(16);
 
-    protected const float minMoveDistance = .001f;
-    protected const float shellRadius = .01f;
-    protected float wallLatchCooldown = 0.3f;
-    protected float wallLatchCooldownTimer = 0f;
 
     void OnEnable()
     {
@@ -81,17 +81,18 @@ public class PhysicsObject : MonoBehaviour {
 
         if (distance > minMoveDistance)
         {
+            // Gets all colliders which the object will hit after moving
             int count = rb.Cast(move, contactFilter, hitBuffer, distance + shellRadius);
             hitBufferList.Clear();
             for (int i = 0; i < count; i++) {
                 hitBufferList.Add(hitBuffer[i]);
             }
 
-            for (int i = 0; i < hitBufferList.Count; i++)
+            for (int i = 0; i < count; i++)
             {
-                Vector2 currentNormal = hitBufferList[i].normal;
+                Vector2 currentNormal = hitBuffer[i].normal;
                 // Set grounded to true if angle smaller than the allowed angle;
-                if (currentNormal.y > minGroundNormalY)
+                if (currentNormal.y >= minGroundNormalY)
                 {
                     grounded = true;
                     if (yMovement)
@@ -101,22 +102,21 @@ public class PhysicsObject : MonoBehaviour {
                     }
                 }
                 // Latches onto wall
-                else if (canWallLatch && !grounded && wallLatchCooldownTimer <= 0 && currentNormal.y > maxWallNormalY && velocity.y < 0 && !grounded)
+                else if (canWallLatch && wallLatchCooldownTimer <= 0 && currentNormal.y > maxWallNormalY && velocity.y < -0.6f)
                 {
                     wallLatched = true;
                     wallLatchCooldownTimer = wallLatchCooldown;
                 }
 
-                // Checks if velocity needs to be changed
+                // Checks if velocity needs to be adjusted to not collide with other colliders
                 float projection = Vector2.Dot(velocity, currentNormal);
                 if (projection < 0)
                 {
                     velocity -= projection * currentNormal;
                 }
-                float modifiedDistance = hitBufferList[i].distance - shellRadius;
+                float modifiedDistance = hitBuffer[i].distance - shellRadius;
                 distance = modifiedDistance < distance ? modifiedDistance : distance;
             }
-
         }        
 
         rb.position = rb.position + move.normalized * distance;
