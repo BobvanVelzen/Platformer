@@ -7,6 +7,12 @@ public class Player : MonoBehaviour {
     public int maxHealth = 1;
     public int health;
     public bool isDead = false;
+    public Color Color
+    {
+        get { return spriteRenderer.color; }
+    }
+
+    private VirtualInput vi;
 
     private PlayerController aliveController;
     private GhostController deadController;
@@ -17,8 +23,13 @@ public class Player : MonoBehaviour {
 
     // Use this for initialization
     void Awake () {
+        vi = new VirtualInput();
+
         aliveController = GetComponent<PlayerController>();
         deadController = GetComponent<GhostController>();
+        aliveController.vi = vi;
+        deadController.vi = vi;
+
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
@@ -28,17 +39,7 @@ public class Player : MonoBehaviour {
     {
         health = maxHealth;
     }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-            Damage(1);
-
-        if (Input.GetKeyDown(KeyCode.R))
-            Revive();
-    }
-
-    // Update is called once per frame
+    
     void FixedUpdate () {
 		if (!isDead && health <= 0)
         {
@@ -46,6 +47,7 @@ public class Player : MonoBehaviour {
             aliveController.enabled = false;
             deadController.enabled = true;
             isDead = true;
+            gameObject.layer = 9;
             animator.SetBool("dead", isDead);
         }
 	}
@@ -59,12 +61,13 @@ public class Player : MonoBehaviour {
             aliveController.enabled = true;
             deadController.enabled = false;
             isDead = false;
+            gameObject.layer = 8;
             health = maxHealth;
             animator.SetBool("dead", isDead);
         }
     }
 
-    public void Damage(int amount)
+    public void Damage(int amount = 1)
     {
         if (!isDead)
         {
@@ -74,7 +77,7 @@ public class Player : MonoBehaviour {
         }
     }
 
-    private void ChangeOpacity(float opacity)
+    public void ChangeOpacity(float opacity)
     {
         Color newColor = spriteRenderer.color;
         newColor.a = Mathf.Clamp(opacity, 0, 1);

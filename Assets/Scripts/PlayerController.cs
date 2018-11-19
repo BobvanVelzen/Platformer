@@ -9,6 +9,8 @@ public class PlayerController : PhysicsObject {
     public float jumpCancelVelocityModifier = 0.3f;
     private bool wasWallLatched;
 
+    public VirtualInput vi;
+
     private SpriteRenderer spriteRenderer;
     private Animator animator;
     private AudioSource audioSource;
@@ -33,9 +35,9 @@ public class PlayerController : PhysicsObject {
 
         Vector2 move = Vector2.zero;
 
-        move.x = Input.GetAxisRaw("Horizontal") * speed;
+        move.x = vi.GetAxisRaw(InAxis.HORIZONTAL) * speed;
 
-        if (Input.GetButtonDown("Jump") && (grounded || wallLatched))
+        if (vi.GetButtonDown(InButton.JUMP) && (grounded || wallLatched))
         {
             wallLatchCooldownTimer = wallLatchCooldown;
             wallLatched = false;
@@ -44,7 +46,7 @@ public class PlayerController : PhysicsObject {
             // Play jump sound
             audioSource.PlayOneShot(jumpSound);
         }
-        else if (Input.GetButtonUp("Jump") && canCancelJump)
+        else if (vi.GetButtonUp(InButton.JUMP) && canCancelJump)
         {
             if (velocity.y > 0)
             {

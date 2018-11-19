@@ -5,24 +5,59 @@ using UnityEngine;
 public class GhostController : MonoBehaviour {
 
     public float speed = 5f;
+    public bool CanUnpossess = true;
+    public Possessable possessing;
 
     // TODO: Get these bounds from outside
     public float boundX = 20f;
     public float boundY = 20f;
 
+    public VirtualInput vi;
+    private Player player;
+
+    private ContactFilter2D contactFilter;
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
 
-    void OnEnable()
+    void Awake()
     {
+        player = GetComponent<Player>();
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        contactFilter.useTriggers = true;
+        contactFilter.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
+        contactFilter.useLayerMask = true;
+    }
+    
     void Update () {
-        float h = Input.GetAxisRaw("Horizontal") * speed;
-        float v = Input.GetAxisRaw("Vertical") * speed;
+
+        if (vi.GetButtonDown(InButton.ACTION))
+        {
+            if (possessing != null)
+            {
+                ActivatePossessing();
+            }
+            else Possess();
+        }
+        if (vi.GetButtonDown(InButton.JUMP))
+        {
+            if (possessing != null)
+            {
+                Unpossess();
+            }
+        }
+
+        if (possessing)
+            return;
+
+        ////////////////////////////////////////////////////////
+
+        float h = vi.GetAxisRaw(InAxis.HORIZONTAL) * speed;
+        float v = vi.GetAxisRaw(InAxis.VERTICAL) * speed;
 
         Vector2 move = new Vector2(h, v) * Time.deltaTime;
 
@@ -40,8 +75,46 @@ public class GhostController : MonoBehaviour {
         {
             move.y = 0;
         }
-        
 
         rb.position += move;
 	}
+
+    private void Possess()
+    {
+        Collider2D[] possessables = new Collider2D[16];
+        int count = rb.OverlapCollider(contactFilter, possessables);
+
+        for (int i = 0; i < count; i++) {
+            Possessable p = possessables[i].GetComponent<Possessable>();
+            if (p != null)
+            {
+                if (p.Possess(player))
+                {
+                    transform.position = p.transform.position;
+
+                    possessing = p;
+                    player.ChangeOpacity(0f);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void Unpossess()
+    {
+        if (possessing != null && CanUnpossess)
+        {
+            possessing.Unpossess();
+            possessing = null;
+            player.ChangeOpacity(0.5f);
+        }
+    }
+
+    private void ActivatePossessing()
+    {
+        if (possessing != null)
+        {
+            possessing.Activate();
+        }
+    }
 }
