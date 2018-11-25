@@ -3,9 +3,20 @@
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerController : PhysicsObject {
 
+    [Tooltip("Allows the player to latch onto walls.")]
+    public bool canWallLatch = true;
+    private bool wallLatched = false;
+    [Tooltip("Time before the player can wall latch again.")]
+    public float wallLatchCooldown = 0.3f;
+    private float wallLatchCooldownTimer = 0f;
+
+    [Tooltip("Allows the player to cancel his jump forcing him down.")]
     public bool canCancelJump = true;
+    [Tooltip("The horizontal move speed of the player.")]
     public float speed = 8f;
+    [Tooltip("The vertical force upwards when the player jump.")]
     public float jumpVelocity = 14f;
+    [Tooltip("The vertical force downwards when the player cancels his jump.")]
     public float jumpCancelVelocityModifier = 0.3f;
     private bool wasWallLatched;
 
@@ -26,27 +37,44 @@ public class PlayerController : PhysicsObject {
 
     protected override void ComputeVelocity()
     {
-        // Play latch sound if just latched
-        if (!wasWallLatched && wallLatched)
+        applyPhysics = !wallLatched;
+
+        if (wallLatchCooldownTimer > 0 && !wallLatched)
         {
-            audioSource.PlayOneShot(latchSound);
+            wallLatchCooldownTimer -= Time.deltaTime;
+        }
+
+        // Play latch sound if just latched
+        if (wallLatched)
+        {
+            if (!wasWallLatched)
+            {
+                audioSource.PlayOneShot(latchSound);
+            }
+        } else if (wallLatchCooldownTimer > 0)
+        {
+            wallLatchCooldownTimer -= Time.deltaTime;
         }
         wasWallLatched = wallLatched;
 
+
+        // Compute Velocity
         Vector2 move = Vector2.zero;
 
-        move.x = vi.GetAxisRaw(InAxis.HORIZONTAL) * speed;
+        move.x = vi.GetAxisRaw(Axis.HORIZONTAL) * speed;
 
-        if (vi.GetButtonDown(InButton.JUMP) && (grounded || wallLatched))
+        if (vi.GetButtonDown(Button.JUMP) && (grounded || wallLatched))
         {
+            velocity.y = jumpVelocity;
+
             wallLatchCooldownTimer = wallLatchCooldown;
             wallLatched = false;
-            velocity.y = jumpVelocity;
+            animator.SetBool("wallLatched", wallLatched);
 
             // Play jump sound
             audioSource.PlayOneShot(jumpSound);
         }
-        else if (vi.GetButtonUp(InButton.JUMP) && canCancelJump)
+        else if (vi.GetButtonUp(Button.JUMP) && canCancelJump)
         {
             if (velocity.y > 0)
             {
@@ -61,9 +89,19 @@ public class PlayerController : PhysicsObject {
         }
 
         animator.SetBool("grounded", grounded);
-        animator.SetBool("wallLatched", wallLatched);
         animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / speed);
 
         targetVelocity = move;
+    }
+
+    protected override void OnHitWall()
+    {
+        // Latches onto wall
+        if (canWallLatch && wallLatchCooldownTimer <= 0)
+        {
+            wallLatched = true;
+            animator.SetBool("wallLatched", wallLatched);
+            wallLatchCooldownTimer = wallLatchCooldown;
+        }
     }
 }

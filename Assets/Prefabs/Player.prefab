@@ -29,7 +29,7 @@ GameObject:
   - component: {fileID: 114605813703625082}
   m_Layer: 8
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -216,9 +216,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6766a14a062fb694ba8dad8698e1883c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallLatchCooldown: 0.5
   gravityModifier: 3
   canWallLatch: 1
+  wallLatchCooldown: 0.5
   canCancelJump: 1
   speed: 8
   jumpVelocity: 14
@@ -252,9 +252,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4755a904268f734ca976c022628f01f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1
+  MaxHealth: 1
   health: 1
-  isDead: 0
+  Color: {r: 0, g: 0, b: 0, a: 0}
+  ControllerAssigned: 0
   hurtSound: {fileID: 8300000, guid: 940b05487795e194391c2bad464325e2, type: 3}
 --- !u!212 &212373278203840890
 SpriteRenderer:

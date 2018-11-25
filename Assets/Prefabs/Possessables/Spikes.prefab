@@ -20,10 +20,10 @@ GameObject:
   m_Component:
   - component: {fileID: 4173198263178474}
   - component: {fileID: 212175190732388106}
-  - component: {fileID: 114802295909574680}
   - component: {fileID: 50139722313559272}
   - component: {fileID: 61741891318007240}
   - component: {fileID: 82407972801347084}
+  - component: {fileID: 114568620936841650}
   m_Layer: 10
   m_Name: Spikes
   m_TagString: Untagged
@@ -184,7 +184,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &114802295909574680
+--- !u!114 &114568620936841650
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -192,12 +192,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1291113277269436}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26284b878395bd348a9b735641d9e332, type: 3}
+  m_Script: {fileID: 11500000, guid: 77e34c5501309df41b12e48c3e837eb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration: 0.5
-  cooldown: 1
-  ghost: {fileID: 0}
+  Cooldown: 0.3
+  duration: 0.7
   spriteOff: {fileID: 21300000, guid: 9f219efbad8e66c4894cf8f61c5221c0, type: 3}
   spriteOn: {fileID: 21300000, guid: a1374d77c1d9e374786f54a17627d0fe, type: 3}
   activateSound: {fileID: 8300000, guid: a6b5c4af30577cc4984fe9050b6b20be, type: 3}

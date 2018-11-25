@@ -16,12 +16,14 @@ public class GhostController : MonoBehaviour {
     private Player player;
 
     private ContactFilter2D contactFilter;
+    private BoxCollider2D col;
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
 
     void Awake()
     {
         player = GetComponent<Player>();
+        col = GetComponent<BoxCollider2D>();
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
@@ -35,7 +37,7 @@ public class GhostController : MonoBehaviour {
     
     void Update () {
 
-        if (vi.GetButtonDown(InButton.ACTION))
+        if (vi.GetButtonDown(Button.ACTION))
         {
             if (possessing != null)
             {
@@ -43,7 +45,7 @@ public class GhostController : MonoBehaviour {
             }
             else Possess();
         }
-        if (vi.GetButtonDown(InButton.JUMP))
+        if (vi.GetButtonDown(Button.JUMP))
         {
             if (possessing != null)
             {
@@ -55,9 +57,10 @@ public class GhostController : MonoBehaviour {
             return;
 
         ////////////////////////////////////////////////////////
+        // Move the player
 
-        float h = vi.GetAxisRaw(InAxis.HORIZONTAL) * speed;
-        float v = vi.GetAxisRaw(InAxis.VERTICAL) * speed;
+        float h = vi.GetAxisRaw(Axis.HORIZONTAL) * speed;
+        float v = vi.GetAxisRaw(Axis.VERTICAL) * speed;
 
         Vector2 move = new Vector2(h, v) * Time.deltaTime;
 
@@ -93,7 +96,10 @@ public class GhostController : MonoBehaviour {
                     transform.position = p.transform.position;
 
                     possessing = p;
-                    player.ChangeOpacity(0f);
+
+                    col.enabled = false;
+                    spriteRenderer.enabled = false;
+
                     break;
                 }
             }
@@ -104,9 +110,13 @@ public class GhostController : MonoBehaviour {
     {
         if (possessing != null && CanUnpossess)
         {
-            possessing.Unpossess();
-            possessing = null;
-            player.ChangeOpacity(0.5f);
+            if (possessing.Unpossess())
+            {
+                col.enabled = true;
+                spriteRenderer.enabled = true;
+
+                possessing = null;
+            }
         }
     }
 
@@ -114,7 +124,7 @@ public class GhostController : MonoBehaviour {
     {
         if (possessing != null)
         {
-            possessing.Activate();
+            possessing.Interact();
         }
     }
 }

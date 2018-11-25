@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour {
 
-    public int maxHealth = 1;
+    public int MaxHealth = 1;
     public int health;
-    public bool isDead = false;
-    public Color Color
-    {
-        get { return spriteRenderer.color; }
-    }
+    private bool isDead = false;
+    public Color Color;
 
-    private VirtualInput vi;
+    // TODO: Revert back to private
+    public bool ControllerAssigned = false;
 
     private PlayerController aliveController;
     private GhostController deadController;
@@ -23,12 +21,11 @@ public class Player : MonoBehaviour {
 
     // Use this for initialization
     void Awake () {
-        vi = new VirtualInput();
-
         aliveController = GetComponent<PlayerController>();
         deadController = GetComponent<GhostController>();
-        aliveController.vi = vi;
-        deadController.vi = vi;
+
+        AssignVirtualInput(new VirtualInput());
+        ControllerAssigned = false;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
@@ -37,7 +34,7 @@ public class Player : MonoBehaviour {
 
     void Start()
     {
-        health = maxHealth;
+        health = MaxHealth;
     }
     
     void FixedUpdate () {
@@ -51,21 +48,6 @@ public class Player : MonoBehaviour {
             animator.SetBool("dead", isDead);
         }
 	}
-
-    // TEMPORARY! Remove this later
-    void Revive()
-    {
-        if (isDead)
-        {
-            ChangeOpacity(1f);
-            aliveController.enabled = true;
-            deadController.enabled = false;
-            isDead = false;
-            gameObject.layer = 8;
-            health = maxHealth;
-            animator.SetBool("dead", isDead);
-        }
-    }
 
     public void Damage(int amount = 1)
     {
@@ -82,5 +64,13 @@ public class Player : MonoBehaviour {
         Color newColor = spriteRenderer.color;
         newColor.a = Mathf.Clamp(opacity, 0, 1);
         spriteRenderer.color = newColor;
+    }
+
+    public void AssignVirtualInput(VirtualInput virtualInput)
+    {
+        aliveController.vi = virtualInput;
+        deadController.vi = virtualInput;
+
+        ControllerAssigned = true;
     }
 }
