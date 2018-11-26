@@ -40,12 +40,14 @@ public class Player : MonoBehaviour {
     void FixedUpdate () {
 		if (!isDead && health <= 0)
         {
-            ChangeOpacity(0.5f);
+            ChangeOpacity(0.7f);
             aliveController.enabled = false;
             deadController.enabled = true;
             isDead = true;
             gameObject.layer = 9;
+            spriteRenderer.sortingOrder = 2;
             animator.SetBool("dead", isDead);
+            animator.SetTrigger("deathTrigger");
         }
 	}
 

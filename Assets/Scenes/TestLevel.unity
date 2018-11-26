@@ -622,7 +622,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1805223295538500, guid: 3b9dbfbdc876056409088172a8477881, type: 2}
       propertyPath: m_Name
-      value: Witch (1)
+      value: Witch 2
       objectReference: {fileID: 0}
     - target: {fileID: 95123769052687770, guid: 3b9dbfbdc876056409088172a8477881,
         type: 2}
